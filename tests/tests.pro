@@ -16,6 +16,8 @@ TEMPLATE = app
 SOURCES += tst_qffmpegtests.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
+DEFINES += PROFILING
+
 HEADERS += \
     tst_qffmpegtests.h
 

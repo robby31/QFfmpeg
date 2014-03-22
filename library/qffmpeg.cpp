@@ -8,15 +8,19 @@ QFfmpeg::QFfmpeg(const QString &filename, QObject *parent):
     global_metaData(0),
     duration(-1),
     bitrate(-1),
+    containerFormat(),
+    audioFormat(),
     audioChannelCount(-2),
     audioSampleRate(-2),
     audioBitRate(-2),
+    picture(),
     streamLanguages(0)
 {
     ANALYZER
 
     if (!initCodec) {
         // Initialize FFmpeg
+        avcodec_register_all();
         av_register_all();
 
         av_log_set_level(AV_LOG_QUIET);
@@ -462,7 +466,6 @@ QByteArray QFfmpeg::getPicture() {
             // is set, there can be buffered up frames that need to be flushed, so we'll do that
             if (pCodecCtx->codec->capabilities & CODEC_CAP_DELAY)
             {
-                qWarning() << "CODEC CAP DELAY";
 //                av_init_packet(&packet);
 //                // Decode all the remaining frames in the buffer, until the end is reached
 //                int frameFinished = 0;
@@ -631,3 +634,4 @@ QString QFfmpeg::metaData(const QString &tagName) {
     ANALYZER_RETURN
     return res;
 }
+
