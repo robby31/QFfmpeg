@@ -21,6 +21,6 @@ DEFINES += PROFILING
 HEADERS += \
     tst_qffmpegtests.h
 
-include (../library/qffmpeg.pri)
+include (../qffmpeg.pri)
 
 
