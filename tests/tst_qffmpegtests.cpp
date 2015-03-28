@@ -8,19 +8,15 @@ void QFfmpegTests::testCase_Audio_MP3()
 {
     QString filename("/Users/doudou/Music/iTunes/iTunes Media/Music/-M-/Mister Mystère/1-02 Phébus.mp3");
 
-    QFfmpeg media(filename, this);
+    QFfmpegProcess media(filename, this);
 
-    QVERIFY(media.parse_metaData() == true);
-
-    media.dumpFormat();
-
-    QVERIFY2(media.getFormat() == "MP2/3 (MPEG audio layer 2/3)", media.getFormat().toUtf8().constData());
-    QVERIFY2(media.getStringDuration() == "00:02:39.37", media.getStringDuration().toUtf8().constData());
+    QVERIFY2(media.getFormat() == "mp3", media.getFormat().toUtf8().constData());
+    QVERIFY2(media.getDuration() == 159373, QString("%1").arg(media.getDuration()).toUtf8());
     QVERIFY(media.getAudioChannelCount() == 2);
     QVERIFY(media.getAudioSamplerate() == 44100);
     QVERIFY(media.getBitrate() == 192808);
     QVERIFY(media.getVideoResolution() == "500x500");
-    QVERIFY(media.getVideoFrameRate() == 90000);
+    QVERIFY2(media.getVideoFrameRate() == 0.0, QString("%1").arg(media.getVideoFrameRate()).toUtf8());
     QVERIFY(media.getAudioBitrate() == 189255);
     QVERIFY(media.getVideoLanguages() == QStringList() << "");
     QVERIFY(media.getAudioLanguages() == QStringList() << "");
@@ -28,7 +24,7 @@ void QFfmpegTests::testCase_Audio_MP3()
     QVERIFY2(media.getAudioFormat() == "mp3", media.getAudioFormat().toUtf8());
 
     QByteArray data = media.getPicture();
-    QVERIFY2(data.size() == 1592, QString("%1").arg(data.size()).toUtf8());
+    QVERIFY2(data.size() == 5289, QString("%1").arg(data.size()).toUtf8());
 
     QVERIFY2(media.metaData("title") == "Phébus", media.metaData("title").toUtf8().constData());
     QVERIFY2(media.metaData("artist") == "-M-", media.metaData("artist").toUtf8().constData());
@@ -40,7 +36,10 @@ void QFfmpegTests::testCase_Audio_MP3()
     QVERIFY2(media.metaData("date") == "2009-09-07", media.metaData("date").toUtf8().constData());
     QVERIFY2(media.metaData("unknown").isNull() == true, media.metaData("unknown").toUtf8().constData());
 
-    QVERIFY(media.close() == true);
+    QFfmpegProcess media2("/Users/doudou/Music/iTunes/iTunes Media/Music/BB Brunes/Nico Teen Love/02 Dynamite.mp3", this);
+
+    data = media2.getPicture();
+    QVERIFY2(data.size() == 19020, QString("%1").arg(data.size()).toUtf8());
 
     ANALYZER_DISPLAY_RESULTS
 }
@@ -49,19 +48,15 @@ void QFfmpegTests::testCase_Audio_M4A()
 {
     QString filename("/Users/doudou/workspaceQT/DLNA_server/tests/AUDIO/01 Monde virtuel.m4a");
 
-    QFfmpeg media(filename, this);
+    QFfmpegProcess media(filename, this);
 
-    QVERIFY(media.parse_metaData() == true);
-
-    media.dumpFormat();
-
-    QVERIFY2(media.getFormat() == "QuickTime / MOV", media.getFormat().toUtf8().constData());
-    QVERIFY2(media.getStringDuration() == "00:03:08.98", media.getStringDuration().toUtf8().constData());
+    QVERIFY2(media.getFormat() == "mov,mp4,m4a,3gp,3g2,mj2", media.getFormat().toUtf8().constData());
+    QVERIFY2(media.getDuration() == 188987, QString("%1").arg(media.getDuration()).toUtf8());
     QVERIFY(media.getAudioChannelCount() == 2);
     QVERIFY(media.getAudioSamplerate() == 44100);
     QVERIFY(media.getBitrate() == 135074);
     QVERIFY(media.getVideoResolution() == "300x300");
-    QVERIFY(media.getVideoFrameRate() == 90000);
+    QVERIFY2(media.getVideoFrameRate() == 0.0, QString("%1").arg(media.getVideoFrameRate()).toUtf8());
     QVERIFY(media.getAudioBitrate() == 124436);
     QVERIFY(media.getVideoLanguages() == QStringList() << "");
     QVERIFY(media.getAudioLanguages() == QStringList() << "und");
@@ -69,7 +64,7 @@ void QFfmpegTests::testCase_Audio_M4A()
     QVERIFY2(media.getAudioFormat() == "aac", media.getAudioFormat().toUtf8());
 
     QByteArray data = media.getPicture();
-    QVERIFY2(data.size() == 4089, QString("%1").arg(data.size()).toUtf8());
+    QVERIFY2(data.size() == 21246, QString("%1").arg(data.size()).toUtf8());
 
     QVERIFY2(media.metaData("title") == "Monde virtuel", media.metaData("title").toUtf8().constData());
     QVERIFY2(media.metaData("artist") == "-M-", media.metaData("artist").toUtf8().constData());
@@ -81,23 +76,17 @@ void QFfmpegTests::testCase_Audio_M4A()
     QVERIFY2(media.metaData("date") == "1999-10-25", media.metaData("date").toUtf8().constData());
     QVERIFY2(media.metaData("unknown").isNull() == true, media.metaData("unknown").toUtf8().constData());
 
-    QVERIFY(media.close() == true);
-
     ANALYZER_DISPLAY_RESULTS
 }
 
-void QFfmpegTests::testCase_Audio_VIDEO()
+void QFfmpegTests::testCase_VIDEO_MKV()
 {
     QString filename("/Users/doudou/Movies/Films/District.9.2009.720p.BrRip.YIFY.mkv");
 
-    QFfmpeg media(filename, this);
+    QFfmpegProcess media(filename, this);
 
-    QVERIFY(media.parse_metaData() == true);
-
-    media.dumpFormat();
-
-    QVERIFY2(media.getFormat() == "Matroska / WebM", media.getFormat().toUtf8().constData());
-    QVERIFY2(media.getStringDuration() == "01:52:15.83", media.getStringDuration().toUtf8().constData());
+    QVERIFY2(media.getFormat() == "matroska,webm", media.getFormat().toUtf8().constData());
+    QVERIFY2(media.getDuration() == 6735830, QString("%1").arg(media.getDuration()).toUtf8());
     QVERIFY(media.getAudioChannelCount() == 2);
     QVERIFY(media.getAudioSamplerate() == 48000);
     QVERIFY(media.getBitrate() == 871427);
@@ -110,44 +99,36 @@ void QFfmpegTests::testCase_Audio_VIDEO()
     QVERIFY2(media.getAudioFormat() == "aac", media.getAudioFormat().toUtf8());
 
     QByteArray data = media.getPicture();
-    QVERIFY2(data.size() == 823, QString("%1").arg(data.size()).toUtf8());
+    QVERIFY2(data.size() == 2007, QString("%1").arg(data.size()).toUtf8());
 
     QVERIFY2(media.metaData("title") == "District 9 - YIFY", media.metaData("title").toUtf8().constData());
-
-    QVERIFY(media.close() == true);
 
     ANALYZER_DISPLAY_RESULTS
 }
 
-void QFfmpegTests::testCase_Audio_VIDEO_MKV()
+void QFfmpegTests::testCase_VIDEO_MKV2()
 {
     QString filename("/Users/doudou/Movies/Films/Margin Call [BDrip m-1080p AC3 Esp-Eng-Fr+subs].mkv");
 
-    QFfmpeg media(filename, this);
+    QFfmpegProcess media(filename, this);
 
-    QVERIFY(media.parse_metaData() == true);
-
-    media.dumpFormat();
-
-    QVERIFY2(media.getFormat() == "Matroska / WebM", media.getFormat().toUtf8().constData());
-    QVERIFY2(media.getStringDuration() == "01:46:59.02", media.getStringDuration().toUtf8().constData());
-    QVERIFY(media.getAudioChannelCount() == 6);
+    QVERIFY2(media.getFormat() == "matroska,webm", media.getFormat().toUtf8().constData());
+    QVERIFY2(media.getDuration() == 6419022, QString("%1").arg(media.getDuration()).toUtf8());
+    QVERIFY(media.getAudioChannelCount() == 2);
     QVERIFY(media.getAudioSamplerate() == 48000);
     QVERIFY(media.getBitrate() == 4293543);
     QVERIFY(media.getVideoResolution() == "1920x1080");
     QVERIFY(media.getVideoFrameRate() == 24);
-    QVERIFY(media.getAudioBitrate() == 448000);
+    QVERIFY2(media.getAudioBitrate() == 112000, QString("%1").arg(media.getAudioBitrate()).toUtf8());
     QVERIFY(media.getVideoLanguages() == (QStringList() << "spa"));
     QVERIFY(media.getAudioLanguages() == (QStringList() << "spa" << "eng" << "fre"));
     QVERIFY(media.getSubtitleLanguages() == (QStringList() << "spa" << "eng" << "fre"));
     QVERIFY2(media.getAudioFormat() == "ac3", media.getAudioFormat().toUtf8());
 
     QByteArray data = media.getPicture();
-    QVERIFY2(data.size() == 1073, QString("%1").arg(data.size()).toUtf8());
+    QVERIFY2(data.size() == 4053, QString("%1").arg(data.size()).toUtf8());
 
     QVERIFY2(media.metaData("title") == "Margin Call m-1080p.guerrero36", media.metaData("title").toUtf8().constData());
-
-    QVERIFY(media.close() == true);
 
     ANALYZER_DISPLAY_RESULTS
 }

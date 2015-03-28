@@ -162,7 +162,7 @@ double QFfmpegProcess::getVideoFrameRate() const
 {
     QRegExp pattern("(\\d+)/(\\d+)");
     QString strFrameRate = videoStream.attributes().namedItem("avg_frame_rate").nodeValue();
-    if (pattern.indexIn(strFrameRate) != -1)
+    if (pattern.indexIn(strFrameRate) != -1 && pattern.cap(2).toDouble() != 0.0)
         return pattern.cap(1).toDouble()/pattern.cap(2).toDouble();
     else
         return 0.0;

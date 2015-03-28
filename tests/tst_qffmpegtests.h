@@ -3,7 +3,7 @@
 
 #include <QString>
 #include <QtTest>
-#include "../library/qffmpeg.h"
+#include "../qffmpegprocess.h"
 
 class QFfmpegTests : public QObject
 {
@@ -15,8 +15,8 @@ public:
 private Q_SLOTS:
     void testCase_Audio_MP3();
     void testCase_Audio_M4A();
-    void testCase_Audio_VIDEO();
-    void testCase_Audio_VIDEO_MKV();
+    void testCase_VIDEO_MKV();
+    void testCase_VIDEO_MKV2();
 };
 
 #endif // TST_QFFMPEGTESTS_H

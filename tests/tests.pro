@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += testlib
+QT       += testlib xml
 
 TARGET = tst_qffmpegtests
 CONFIG   += console
