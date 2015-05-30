@@ -1,14 +1,13 @@
-SOURCES += $$PWD/qffmpegprocess.cpp \
-           #$$PWD/qffmpeg.cpp \
-           #$$PWD/qavframe.cpp
+INCLUDEPATH += $$PWD
+DEPENDPATH += $$PWD
 
-HEADERS += $$PWD/qffmpegprocess.h\
-           #$$PWD/qffmpeg.h \
-           #$$PWD/qavframe.h
+HEADERS += \
+           $$PWD/qffmpegprocess.h
 
-#include (../ffmpeg/ffmpeg.pri)
+SOURCES += \
+           $$PWD/qffmpegprocess.cpp
+
 include (../Analyzer/analyzer.pri)
 
 
-INCLUDEPATH += $$PWD
-DEPENDPATH += $$PWD
+

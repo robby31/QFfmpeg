@@ -213,7 +213,7 @@ QByteArray QFfmpegProcess::parsePicture() const
     QByteArray picture("");
 
     QProcess process;
-    QString program = "/Users/doudou/workspaceQT/DLNA_server/exe/ffmpeg";
+    QString program = "/opt/local/bin/ffmpeg";
     QStringList arguments = QStringList() << "-i" << filename << "-f" << "mjpeg" << "-vframes" << "1" << "-s" << "300x300" << "-loglevel" << "error" << "pipe:";
     process.setProgram(program);
     process.setArguments(arguments);

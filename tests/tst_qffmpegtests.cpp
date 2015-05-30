@@ -24,7 +24,7 @@ void QFfmpegTests::testCase_Audio_MP3()
     QVERIFY2(media.getAudioFormat() == "mp3", media.getAudioFormat().toUtf8());
 
     QByteArray data = media.getPicture();
-    QVERIFY2(data.size() == 5289, QString("%1").arg(data.size()).toUtf8());
+    QVERIFY2(data.size() == 5290, QString("%1").arg(data.size()).toUtf8());
 
     QVERIFY2(media.metaData("title") == "Phébus", media.metaData("title").toUtf8().constData());
     QVERIFY2(media.metaData("artist") == "-M-", media.metaData("artist").toUtf8().constData());
@@ -64,7 +64,7 @@ void QFfmpegTests::testCase_Audio_M4A()
     QVERIFY2(media.getAudioFormat() == "aac", media.getAudioFormat().toUtf8());
 
     QByteArray data = media.getPicture();
-    QVERIFY2(data.size() == 21246, QString("%1").arg(data.size()).toUtf8());
+    QVERIFY2(data.size() == 21247, QString("%1").arg(data.size()).toUtf8());
 
     QVERIFY2(media.metaData("title") == "Monde virtuel", media.metaData("title").toUtf8().constData());
     QVERIFY2(media.metaData("artist") == "-M-", media.metaData("artist").toUtf8().constData());
@@ -99,7 +99,7 @@ void QFfmpegTests::testCase_VIDEO_MKV()
     QVERIFY2(media.getAudioFormat() == "aac", media.getAudioFormat().toUtf8());
 
     QByteArray data = media.getPicture();
-    QVERIFY2(data.size() == 2007, QString("%1").arg(data.size()).toUtf8());
+    QVERIFY2(data.size() == 2008, QString("%1").arg(data.size()).toUtf8());
 
     QVERIFY2(media.metaData("title") == "District 9 - YIFY", media.metaData("title").toUtf8().constData());
 
@@ -126,7 +126,7 @@ void QFfmpegTests::testCase_VIDEO_MKV2()
     QVERIFY2(media.getAudioFormat() == "ac3", media.getAudioFormat().toUtf8());
 
     QByteArray data = media.getPicture();
-    QVERIFY2(data.size() == 4053, QString("%1").arg(data.size()).toUtf8());
+    QVERIFY2(data.size() == 4054, QString("%1").arg(data.size()).toUtf8());
 
     QVERIFY2(media.metaData("title") == "Margin Call m-1080p.guerrero36", media.metaData("title").toUtf8().constData());
 
