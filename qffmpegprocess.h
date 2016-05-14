@@ -12,8 +12,11 @@ class QFfmpegProcess : public QObject
     Q_OBJECT
 
 public:
+    explicit QFfmpegProcess(QObject *parent = 0);
     explicit QFfmpegProcess(const QString &filename, QObject *parent = 0);
     ~QFfmpegProcess();
+
+    bool isValid() const;
 
     QString metaData(const QString &tagName) const;
     QString getFormat() const;
@@ -25,6 +28,7 @@ public:
     int getAudioSamplerate() const;
     int getAudioBitrate() const;
     QString getAudioFormat() const;
+    QHash<QString, double> getVolumeInfo(const int timeout = 30000);
 
     QString getVideoResolution() const;
     double getVideoFrameRate() const;
@@ -32,6 +36,12 @@ public:
     QStringList getAudioLanguages() const { return getSreamsTag("audio", "language"); }
     QStringList getVideoLanguages() const { return getSreamsTag("video", "language"); }
     QStringList getSubtitleLanguages() const { return getSreamsTag("subtitle", "language"); }
+
+    qint64 size() const;
+
+    static void setDirPath(const QString &folder);
+
+    void setFilename(const QString &filename, const bool &readPicture = false);
 
 private:
     QByteArray parsePicture() const;
@@ -43,8 +53,9 @@ public slots:
     void probeFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
-    QString filename;
+    static QString EXE_DIRPATH;
     QProcess programFfmpegProbe;
+    QString filename;
     QDomDocument xmlResProbe;
     QDomNode audioStream;
     QDomNode videoStream;

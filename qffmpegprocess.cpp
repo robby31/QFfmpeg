@@ -1,9 +1,16 @@
 #include "qffmpegprocess.h"
 
-QFfmpegProcess::QFfmpegProcess(const QString &filename, QObject *parent):
+QString QFfmpegProcess::EXE_DIRPATH = "";
+
+void QFfmpegProcess::setDirPath(const QString &folder)
+{
+    EXE_DIRPATH = folder;
+}
+
+QFfmpegProcess::QFfmpegProcess(QObject *parent):
     QObject(parent),
-    filename(filename),
     programFfmpegProbe(this),
+    filename(),
     xmlResProbe(),
     audioStream(),
     videoStream(),
@@ -11,24 +18,66 @@ QFfmpegProcess::QFfmpegProcess(const QString &filename, QObject *parent):
 {
     ANALYZER
 
-    connect(&programFfmpegProbe, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(probeFinished(int,QProcess::ExitStatus)));
+    if (EXE_DIRPATH.isEmpty())
+    {
+        qWarning() << "QFFmpeg, invalid installation path where are located FFMPEG binaries.";
+    }
+    else
+    {
+        QDir folder(EXE_DIRPATH);
+        if (!folder.exists())
+        {
+            qWarning() << "QFFmpeg, invalid installation path where are located FFMPEG binaries:" << folder;
+        }
+        else
+        {
+            connect(&programFfmpegProbe, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(probeFinished(int,QProcess::ExitStatus)));
 
-    programFfmpegProbe.setProgram("/opt/local/bin/ffprobe");
-    QStringList argFfmpeg;
-    argFfmpeg << "-i" << filename;
-    argFfmpeg << "-show_format";
-    argFfmpeg << "-show_entries" << "stream";
-    argFfmpeg << "-of" << "xml";
-    programFfmpegProbe.setArguments(argFfmpeg);
-    programFfmpegProbe.start();
-    if (!programFfmpegProbe.waitForStarted())
-        qWarning() << "probe not started" << filename;
-
-    picture = parsePicture();
-
-    programFfmpegProbe.waitForFinished();
+            programFfmpegProbe.setProgram(folder.absoluteFilePath("ffprobe"));
+        }
+    }
 
     ANALYZER_RETURN
+}
+
+QFfmpegProcess::QFfmpegProcess(const QString &filename, QObject *parent):
+    QObject(parent),
+    programFfmpegProbe(this),
+    filename(),
+    xmlResProbe(),
+    audioStream(),
+    videoStream(),
+    picture()
+{
+    ANALYZER
+
+    if (EXE_DIRPATH.isEmpty())
+    {
+        qWarning() << "QFFmpeg, invalid installation path where are located FFMPEG binaries.";
+    }
+    else
+    {
+        QDir folder(EXE_DIRPATH);
+        if (!folder.exists())
+        {
+            qWarning() << "QFFmpeg, invalid installation path where are located FFMPEG binaries:" << folder;
+        }
+        else
+        {
+            connect(&programFfmpegProbe, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(probeFinished(int,QProcess::ExitStatus)));
+
+            programFfmpegProbe.setProgram(folder.absoluteFilePath("ffprobe"));
+
+            setFilename(filename, true);
+        }
+    }
+
+    ANALYZER_RETURN
+}
+
+bool QFfmpegProcess::isValid() const
+{
+    return !programFfmpegProbe.program().isEmpty();
 }
 
 QFfmpegProcess::~QFfmpegProcess()
@@ -37,7 +86,8 @@ QFfmpegProcess::~QFfmpegProcess()
 
     if (programFfmpegProbe.state() == QProcess::Running)
     {
-        if (!programFfmpegProbe.waitForFinished())
+        programFfmpegProbe.kill();
+        if (!programFfmpegProbe.waitForFinished(-1))
             qWarning() << "unable to finish probe" << filename;
     }
 
@@ -52,6 +102,7 @@ void QFfmpegProcess::probeFinished(int exitCode, QProcess::ExitStatus exitStatus
 
     xmlResProbe.clear();
     audioStream.clear();
+    videoStream.clear();
 
     if (exitStatus == QProcess::NormalExit)
     {
@@ -100,6 +151,12 @@ QString QFfmpegProcess::getFormat() const
 {
     QDomNode format = xmlResProbe.elementsByTagName("format").at(0);
     return format.attributes().namedItem("format_name").nodeValue();
+}
+
+qint64 QFfmpegProcess::size() const
+{
+    QDomNode format = xmlResProbe.elementsByTagName("format").at(0);
+    return format.attributes().namedItem("size").nodeValue().toLongLong();
 }
 
 int QFfmpegProcess::getBitrate() const
@@ -213,12 +270,12 @@ QByteArray QFfmpegProcess::parsePicture() const
     QByteArray picture("");
 
     QProcess process;
-    QString program = "/opt/local/bin/ffmpeg";
+    process.setProgram(QDir(EXE_DIRPATH).absoluteFilePath("ffmpeg"));
     QStringList arguments = QStringList() << "-i" << filename << "-f" << "mjpeg" << "-vframes" << "1" << "-s" << "300x300" << "-loglevel" << "error" << "pipe:";
-    process.setProgram(program);
     process.setArguments(arguments);
     process.start();
-    if (process.waitForFinished()) {
+    if (process.waitForFinished())
+    {
         if (process.exitCode() != 0) {
             QString error(process.readAllStandardError().trimmed());
 //            if (error != "Output file #0 does not contain any stream")
@@ -236,6 +293,11 @@ QByteArray QFfmpegProcess::parsePicture() const
     else
     {
         qWarning() << "NO PICTURE" << filename;
+        if (process.state() == QProcess::Running)
+        {
+            process.kill();
+            process.waitForFinished(-1);
+        }
     }
 
     ANALYZER_RETURN
@@ -257,4 +319,87 @@ QByteArray QFfmpegProcess::getPicture() const {
 
     ANALYZER_RETURN
     return picture;
+}
+
+QHash<QString, double> QFfmpegProcess::getVolumeInfo(const int timeout)
+{
+    ANALYZER
+
+    QHash<QString, double> result;
+
+    QProcess process;
+    process.setProgram(QDir(EXE_DIRPATH).absoluteFilePath("ffmpeg"));
+    QStringList arguments = QStringList() << "-hide_banner" << "-nostats";
+    arguments << "-i" << filename;
+    arguments << "-map" << "0:a" << "-af" << "volumedetect";
+    arguments << "-to" << "1800";  // parse only 30 minutes
+    arguments << "-f" << "null" << "/dev/null";
+    process.setArguments(arguments);
+    process.start();
+
+    if (process.waitForFinished(timeout))
+    {
+        if (process.exitCode() != 0)
+        {
+            QString error(process.readAllStandardError().trimmed());
+            qWarning() << "ERROR" << process.exitCode() << filename << error;
+        }
+        else
+        {
+            QRegularExpression pattern("\\[Parsed_volumedetect_0.*\\]\\s*(\\w+):\\s*([\\+\\-\\.\\w]+)");
+
+            QString data = process.readAllStandardError();
+
+            QRegularExpressionMatchIterator iterator = pattern.globalMatch(data);
+            while (iterator.hasNext())
+            {
+                QRegularExpressionMatch match = iterator.next();
+                result[match.captured(1)] = match.captured(2).toDouble();
+            }
+        }
+    }
+    else
+    {
+        qWarning() << "NO VOLUME INFO" << filename;
+
+        if (process.state() == QProcess::Running)
+        {
+            process.kill();  // timeout, process is still running
+            process.waitForFinished();
+        }
+    }
+
+    ANALYZER_RETURN
+    return result;
+}
+
+void QFfmpegProcess::setFilename(const QString &filename, const bool &readPicture)
+{
+    ANALYZER
+
+    this->filename = filename;
+    xmlResProbe.clear();
+    audioStream.clear();
+    videoStream.clear();
+    picture.clear();
+
+    QStringList argFfmpeg;
+    argFfmpeg << "-i" << filename;
+    argFfmpeg << "-show_format";
+    argFfmpeg << "-show_entries" << "stream";
+    argFfmpeg << "-of" << "xml";
+    programFfmpegProbe.setArguments(argFfmpeg);
+
+    programFfmpegProbe.start();
+
+    if (!programFfmpegProbe.waitForStarted())
+        qWarning() << "probe not started" << filename;
+
+    if (readPicture)
+        picture = parsePicture();
+
+    if (programFfmpegProbe.state() == QProcess::Running)
+        programFfmpegProbe.waitForFinished(-1);
+
+    ANALYZER_RETURN
 }
