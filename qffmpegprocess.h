@@ -41,13 +41,14 @@ public:
 
     static void setDirPath(const QString &folder);
 
-    void setFilename(const QString &filename, const bool &readPicture = false);
+    bool setFilename(const QString &filename, const bool &readPicture = false);
 
 private:
     QByteArray parsePicture() const;
     QStringList getSreamsTag(const QString &codec_type, const QString &tagName) const;
 
 signals:
+    void mediaReady();    // signal emitted when probe on media is done and picture parsed
 
 public slots:
     void probeFinished(int exitCode, QProcess::ExitStatus exitStatus);

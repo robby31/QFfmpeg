@@ -68,7 +68,8 @@ QFfmpegProcess::QFfmpegProcess(const QString &filename, QObject *parent):
 
             programFfmpegProbe.setProgram(folder.absoluteFilePath("ffprobe"));
 
-            setFilename(filename, true);
+            if (setFilename(filename, true))
+                programFfmpegProbe.waitForFinished();
         }
     }
 
@@ -123,6 +124,8 @@ void QFfmpegProcess::probeFinished(int exitCode, QProcess::ExitStatus exitStatus
     {
         qWarning() << "probe crashed" << filename;
     }
+
+    emit mediaReady();
 
     ANALYZER_RETURN
 }
@@ -373,7 +376,7 @@ QHash<QString, double> QFfmpegProcess::getVolumeInfo(const int timeout)
     return result;
 }
 
-void QFfmpegProcess::setFilename(const QString &filename, const bool &readPicture)
+bool QFfmpegProcess::setFilename(const QString &filename, const bool &readPicture)
 {
     ANALYZER
 
@@ -393,13 +396,17 @@ void QFfmpegProcess::setFilename(const QString &filename, const bool &readPictur
     programFfmpegProbe.start();
 
     if (!programFfmpegProbe.waitForStarted())
-        qWarning() << "probe not started" << filename;
+    {
+        qCritical() << "probe not started" << filename;
+        return false;
+    }
+    else
+    {
+        if (readPicture)
+            picture = parsePicture();
 
-    if (readPicture)
-        picture = parsePicture();
-
-    if (programFfmpegProbe.state() == QProcess::Running)
-        programFfmpegProbe.waitForFinished(-1);
+        return false;
+    }
 
     ANALYZER_RETURN
 }
