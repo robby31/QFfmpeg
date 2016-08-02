@@ -20,14 +20,14 @@ QFfmpegProcess::QFfmpegProcess(QObject *parent):
 
     if (EXE_DIRPATH.isEmpty())
     {
-        qWarning() << "QFFmpeg, invalid installation path where are located FFMPEG binaries.";
+        qCritical() << "QFFmpeg, invalid installation path where are located FFMPEG binaries.";
     }
     else
     {
         QDir folder(EXE_DIRPATH);
         if (!folder.exists())
         {
-            qWarning() << "QFFmpeg, invalid installation path where are located FFMPEG binaries:" << folder;
+            qCritical() << "QFFmpeg, invalid installation path where are located FFMPEG binaries:" << folder;
         }
         else
         {
@@ -53,14 +53,14 @@ QFfmpegProcess::QFfmpegProcess(const QString &filename, QObject *parent):
 
     if (EXE_DIRPATH.isEmpty())
     {
-        qWarning() << "QFFmpeg, invalid installation path where are located FFMPEG binaries.";
+        qCritical() << "QFFmpeg, invalid installation path where are located FFMPEG binaries.";
     }
     else
     {
         QDir folder(EXE_DIRPATH);
         if (!folder.exists())
         {
-            qWarning() << "QFFmpeg, invalid installation path where are located FFMPEG binaries:" << folder;
+            qCritical() << "QFFmpeg, invalid installation path where are located FFMPEG binaries:" << folder;
         }
         else
         {
@@ -89,7 +89,7 @@ QFfmpegProcess::~QFfmpegProcess()
     {
         programFfmpegProbe.kill();
         if (!programFfmpegProbe.waitForFinished(-1))
-            qWarning() << "unable to finish probe" << filename;
+            qCritical() << "unable to finish probe" << filename;
     }
 
     ANALYZER_RETURN
@@ -122,7 +122,7 @@ void QFfmpegProcess::probeFinished(int exitCode, QProcess::ExitStatus exitStatus
     }
     else
     {
-        qWarning() << "probe crashed" << filename;
+        qCritical() << "probe crashed" << filename;
     }
 
     emit mediaReady();
@@ -345,7 +345,7 @@ QHash<QString, double> QFfmpegProcess::getVolumeInfo(const int timeout)
         if (process.exitCode() != 0)
         {
             QString error(process.readAllStandardError().trimmed());
-            qWarning() << "ERROR" << process.exitCode() << filename << error;
+            qCritical() << "ERROR" << process.exitCode() << filename << error;
         }
         else
         {
@@ -380,7 +380,6 @@ bool QFfmpegProcess::setFilename(const QString &filename, const bool &readPictur
 {
     ANALYZER
 
-    this->filename = filename;
     xmlResProbe.clear();
     audioStream.clear();
     videoStream.clear();
@@ -402,11 +401,13 @@ bool QFfmpegProcess::setFilename(const QString &filename, const bool &readPictur
     }
     else
     {
+        this->filename = filename;
+
         if (readPicture)
             picture = parsePicture();
-
-        return false;
     }
+
+    return true;
 
     ANALYZER_RETURN
 }
