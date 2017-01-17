@@ -69,7 +69,17 @@ QFfmpegProcess::QFfmpegProcess(const QString &filename, QObject *parent):
             programFfmpegProbe.setProgram(folder.absoluteFilePath("ffprobe"));
 
             if (setFilename(filename, true))
-                programFfmpegProbe.waitForFinished();
+            {
+                if (!programFfmpegProbe.waitForFinished() or programFfmpegProbe.exitCode() != 0)
+                {
+                    if (programFfmpegProbe.exitCode() != 0)
+                        qWarning() << "setFilename function returns error" << programFfmpegProbe.exitCode();
+                    else
+                        qWarning() << "timeout passed for setFilename function";
+
+                    programFfmpegProbe.close();
+                }
+            }
         }
     }
 
@@ -85,12 +95,7 @@ QFfmpegProcess::~QFfmpegProcess()
 {
     ANALYZER
 
-    if (programFfmpegProbe.state() == QProcess::Running)
-    {
-        programFfmpegProbe.kill();
-        if (!programFfmpegProbe.waitForFinished(-1))
-            qCritical() << "unable to finish probe" << filename;
-    }
+    programFfmpegProbe.close();
 
     ANALYZER_RETURN
 }
@@ -296,11 +301,7 @@ QByteArray QFfmpegProcess::parsePicture() const
     else
     {
         qWarning() << "NO PICTURE" << filename;
-        if (process.state() == QProcess::Running)
-        {
-            process.kill();
-            process.waitForFinished(-1);
-        }
+        process.close();
     }
 
     ANALYZER_RETURN
@@ -364,12 +365,7 @@ QHash<QString, double> QFfmpegProcess::getVolumeInfo(const int timeout)
     else
     {
         qWarning() << "NO VOLUME INFO" << filename;
-
-        if (process.state() == QProcess::Running)
-        {
-            process.kill();  // timeout, process is still running
-            process.waitForFinished();
-        }
+        process.close();
     }
 
     ANALYZER_RETURN
