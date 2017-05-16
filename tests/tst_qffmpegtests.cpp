@@ -2,6 +2,7 @@
 
 QFfmpegTests::QFfmpegTests()
 {
+    QFfmpegProcess::setDirPath("/opt/local/bin");
 }
 
 void QFfmpegTests::testCase_Audio_MP3()
@@ -39,7 +40,7 @@ void QFfmpegTests::testCase_Audio_MP3()
     QFfmpegProcess media2("/Users/doudou/Music/iTunes/iTunes Media/Music/BB Brunes/Nico Teen Love/02 Dynamite.mp3", this);
 
     data = media2.getPicture();
-    QVERIFY2(data.size() == 19020, QString("%1").arg(data.size()).toUtf8());
+    QVERIFY2(data.size() == 19021, QString("%1").arg(data.size()).toUtf8());
 
     ANALYZER_DISPLAY_RESULTS
 }
