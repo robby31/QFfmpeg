@@ -403,7 +403,6 @@ bool QFfmpegProcess::setFilename(const QString &filename, const bool &readPictur
             picture = parsePicture();
     }
 
-    return true;
-
     ANALYZER_RETURN
+    return true;
 }
