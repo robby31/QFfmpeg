@@ -14,7 +14,7 @@ class QFfmpegProcess : public QObject
 public:
     explicit QFfmpegProcess(QObject *parent = 0);
     explicit QFfmpegProcess(const QString &filename, QObject *parent = 0);
-    ~QFfmpegProcess();
+    virtual ~QFfmpegProcess() Q_DECL_OVERRIDE;
 
     bool isValid() const;
 
@@ -33,9 +33,9 @@ public:
     QString getVideoResolution() const;
     double getVideoFrameRate() const;
 
-    QStringList getAudioLanguages() const { return getSreamsTag("audio", "language"); }
-    QStringList getVideoLanguages() const { return getSreamsTag("video", "language"); }
-    QStringList getSubtitleLanguages() const { return getSreamsTag("subtitle", "language"); }
+    QStringList getAudioLanguages() const { return getStreamsTag("audio", "language"); }
+    QStringList getVideoLanguages() const { return getStreamsTag("video", "language"); }
+    QStringList getSubtitleLanguages() const { return getStreamsTag("subtitle", "language"); }
 
     qint64 size() const;
 
@@ -44,23 +44,31 @@ public:
     bool setFilename(const QString &filename, const bool &readPicture = false);
 
 private:
-    QByteArray parsePicture() const;
-    QStringList getSreamsTag(const QString &codec_type, const QString &tagName) const;
+    bool waitProbeFinished() const;
+    void parsePicture();
+    bool waitPictureFinished() const;
+    QStringList getStreamsTag(const QString &codec_type, const QString &tagName) const;
 
 signals:
     void mediaReady();    // signal emitted when probe on media is done and picture parsed
 
 public slots:
     void probeFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void pictureFinished(int exitCode, QProcess::ExitStatus exitStatus);
+
+private slots:
+    void probeDestroyed();
+    void pictureDestroyed();
 
 private:
     static QString EXE_DIRPATH;
-    QProcess programFfmpegProbe;
+    QProcess *programFfmpegProbe;
+    QProcess *programFfmpegPicture;
     QString filename;
     QDomDocument xmlResProbe;
     QDomNode audioStream;
     QDomNode videoStream;
-    QByteArray picture;
+    QByteArray *picture;
 };
 
 #endif // QFFMPEGPROCESS_H
